@@ -1,8 +1,7 @@
 'use client';
 
-import * as React from 'react';
-import Link from 'next/link';
 import { Logo } from '@org/ui';
+import Link from 'next/link';
 
 export function Footer() {
   return (
