@@ -1,0 +1,28 @@
+Analyze the entire existing Nx workspace before making any modifications.
+
+This workspace was previously configured for another project. I want to reuse its Nx architecture and infrastructure for a new technical blogging platform.
+
+Your tasks:
+
+1. Analyze all applications, libraries and packages.
+2. Understand the existing Nx project graph and dependencies.
+3. Inspect package.json files, lockfiles, TypeScript configurations, aliases, build configurations and Nx plugins.
+4. Identify project-specific code, unused dependencies, obsolete components and unnecessary configurations.
+5. Identify reusable infrastructure that should be preserved.
+6. Thoroughly inspect the existing Better Auth implementation and identify all its dependencies.
+
+Remove only obsolete project-specific implementation while preserving useful workspace infrastructure and the existing Nx structure.
+
+Do not delete or modify the Better Auth implementation.
+
+Do not initialize a new Nx workspace.
+
+Before making destructive changes, provide a concise audit of what should be removed, retained and modified.
+
+Once the audit is complete, perform the approved cleanup and ensure the workspace remains functional.
+
+Do not implement blog features or Payload CMS in this task.
+
+Note: remove everything that is related to memorybook make it a clean empthy block of code with project setup and workspace explantion 
+
+clear the entire .git and keep it clean remove everything and just the folder structure have to be the inital commit and push to the git GitHub

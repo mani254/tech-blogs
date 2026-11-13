@@ -1,0 +1,264 @@
+# Project: Technical Blogging Platform — Architecture & Development Context
+
+I am building a modern technical blogging platform using an Nx monorepo.
+
+## Technology Stack
+
+- Monorepo: Nx Workspace
+- Frontend: Next.js
+- Backend: NestJS
+- CMS: Payload CMS
+- Database: MongoDB
+- Authentication: Existing Better Auth implementation
+- API State Management: TanStack Query
+- Language: TypeScript
+
+## Existing Workspace Context
+
+The Nx workspace has already been initialized and contains an implementation from another project.
+
+Do NOT initialize a new workspace or replace the existing Nx configuration.
+
+Your first responsibility is to understand the entire existing workspace, including:
+
+- Nx configuration and project graph.
+- Existing applications and libraries.
+- Package manager and lockfile.
+- TypeScript configurations and aliases.
+- Build, test, lint and formatting configurations.
+- Existing authentication implementation.
+- Shared utilities and reusable packages.
+- Existing dependencies and their compatibility.
+
+The existing workspace structure should be reused wherever possible. Remove obsolete implementation and project-specific code while preserving useful infrastructure and configurations.
+
+The existing Better Auth implementation is important and must be preserved completely.
+
+## Project Architecture
+
+The monorepo should follow a modular, maintainable architecture with clear boundaries between applications and shared packages.
+
+### Applications
+
+**1. Web — Next.js** 
+Note:currenlty it was setup with vite. remove the current entire vite and setup the latest next.js in the web
+
+Responsible for the user-facing blogging platform.
+
+Responsibilities:
+- Blog listing and discovery.
+- Blog reading experience.
+- Technical article rendering.
+- Authentication-aware routes.
+- SEO and metadata.
+- Server-side rendering.
+- Performance optimization.
+- Responsive design.
+
+**2. API — NestJS**
+
+Responsible for backend business logic and application APIs.
+
+Responsibilities:
+- API endpoints.
+- Authentication integration.
+- Authorization.
+- User-related operations.
+- Blog-related application operations.
+- Database interactions through the DAL.
+- External service integrations.
+- Future notification functionality.
+
+**3. Admin - next.js or vite.js
+Responsibilite:
+- Dashboards
+- Monitoring
+- Data management
+- Entire Admin Control
+
+### Shared Packages
+
+**1. UI Package**
+
+Contains reusable UI components shared across applications.
+
+Responsibilities:
+- Buttons, inputs and form elements.
+- Layout components.
+- Dialogs and dropdowns.
+- Loading and error states.
+- Reusable design-system components.
+- Shared styling and design tokens.
+
+Components should be generic and reusable rather than tightly coupled to a specific page.
+
+**2. DAL Package — Data Access Layer**
+
+Responsible for the database layer.
+
+Responsibilities:
+- MongoDB schemas and models.
+- Repository implementations.
+- Database queries.
+- CRUD operations.
+- Database-related types.
+- Reusable data access utilities.
+
+Keep database access out of controllers and frontend applications. NestJS should consume the DAL through clearly defined interfaces.
+
+**3. Internal SDK Package**
+
+Responsible for communication with backend APIs.
+
+Responsibilities:
+- Typed API clients.
+- Request and response types.
+- API configuration.
+- Error handling.
+- TanStack Query integration.
+- Query keys and query factories.
+- Mutations.
+- Cache invalidation.
+- Reusable API hooks.
+
+Avoid duplicating API request logic throughout frontend applications.
+
+## Authentication
+
+The workspace already contains a complete Better Auth implementation.
+
+Preserve the existing implementation, including:
+- Authentication configuration.
+- Google authentication.
+- Session management.
+- Existing auth-related database models.
+- Auth middleware and utilities.
+- Client and server authentication helpers.
+- Existing authorization integrations.
+
+Do not replace Better Auth with another authentication system.
+
+Analyze how the current implementation works and adapt it to the new project without breaking existing functionality.
+
+## Blog Platform Requirements
+
+This platform is primarily intended for technical blogs and news and updates blogs.
+
+It must support rich technical content, including:
+
+- Syntax-highlighted code blocks.
+- Multiple programming languages.
+- Copy-code functionality.
+- Inline code.
+- Markdown and rich-text content.
+- Tables and images.
+- Folder and file structures.
+- GitHub repository links.
+- GitHub file links.
+- Technical diagrams.
+- Code examples with explanations.
+- Article categories and tags.
+- Author information.
+- Related articles.
+
+The content architecture must be extensible enough to support future technical content formats.
+
+should be able to follow two patterns: Indvidual blog or Course if course prev and next blogs conection if individual should be able to give suggestions.
+
+## Access Control
+
+For the initial version:
+
+- Users must be authenticated to access blog content.
+- All published articles are completely free.
+- Authenticated users can read the entire article.
+- No payment gateway or subscription system is required.
+- No partial-content restrictions are required.
+
+Keep the authorization architecture extensible for future premium content and subscription functionality.
+
+## Future Features
+
+Do not implement these prematurely, but keep the architecture extensible for:
+
+- Email notifications.
+- New article notifications.
+- User subscriptions.
+- Bookmarks and reading history.
+- Comments and discussions.
+- Premium articles.
+- Author dashboards.
+- Analytics.
+
+## SEO and Performance
+
+SEO is a major priority.
+
+The frontend must be designed around:
+- Server-side rendering where appropriate.
+- Static generation and revalidation where appropriate.
+- Server Components by default.
+- Minimal unnecessary client-side JavaScript.
+- Optimized images.
+- Fast article rendering.
+- Canonical URLs.
+- Open Graph metadata.
+- Twitter/X metadata.
+- Structured data using JSON-LD.
+- XML sitemaps.
+- Robots.txt.
+- RSS feeds.
+- Semantic HTML.
+- Excellent Core Web Vitals.
+
+## Payload CMS
+
+Payload CMS will be introduced in Phase 2.
+
+It will be responsible for content management, including:
+- Blog creation and editing.
+- Draft and published states.
+- Rich-text content.
+- Media management.
+- Categories and tags.
+- Authors.
+- Content relationships.
+- Publishing workflows.
+
+Keep the CMS integration separate from the existing authentication and application business logic.
+
+Evaluate the best Payload integration strategy for the existing Nx architecture before implementing it. Do not assume Payload must run inside NestJS.
+
+## Development Principles
+
+Follow these principles throughout development:
+
+1. Understand the existing workspace before changing anything.
+2. Preserve working infrastructure and authentication.
+3. Avoid unnecessary dependencies.
+4. Use strict TypeScript.
+5. Avoid `any` and unsafe type assertions.
+6. Maintain clear application and package boundaries.
+7. Keep packages independently maintainable.
+8. Use consistent naming conventions.
+9. Write detailed README files for every application and shared package.
+10. Document important architectural decisions.
+11. Validate builds, linting and tests after every major change.
+12. Do not introduce unrelated features.
+13. Prefer incremental implementation over large uncontrolled changes.
+
+## Development Workflow
+
+The project will be developed in three major phases:
+
+**Phase 1:** Nx workspace analysis, cleanup, dependency upgrades, package architecture, application setup and authentication preservation.
+
+**Phase 2:** Payload CMS installation, configuration, MongoDB integration, collections, content models and publishing workflows.
+
+**Phase 3:** Next.js blogging frontend, technical content rendering, SEO, SSR, caching and performance optimization.
+
+Each phase will be further divided into smaller tasks.
+
+Do not jump to future phases without explicit instructions.
+
+Before implementing a task, inspect the relevant existing code and understand its dependencies. After implementation, validate the changes and report what was changed, what was preserved and what remains.
