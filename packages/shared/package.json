@@ -13,6 +13,12 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./cms": {
+      "@org/source": "./src/cms/index.ts",
+      "types": "./dist/cms/index.d.ts",
+      "import": "./dist/cms/index.js",
+      "default": "./dist/cms/index.js"
     }
   },
   "scripts": {

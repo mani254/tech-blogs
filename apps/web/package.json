@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+    "@org/content-renderer": "workspace:*",
     "@org/internal-sdk": "workspace:*",
     "@org/shared": "workspace:*",
     "@org/ui": "workspace:*",
