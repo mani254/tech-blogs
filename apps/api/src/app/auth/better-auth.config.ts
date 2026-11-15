@@ -25,6 +25,85 @@ const trustedOrigins = [
   ...corsOrigins,
 ];
 
+async function getConnectedDb(): Promise<MongoDb> {
+  if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+    return mongoose.connection.db;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+      return resolve();
+    }
+    const timeout = setTimeout(() => {
+      reject(
+        new Error(
+          '[BetterAuth] MongoDB connection timed out waiting for connectDatabase() in main.ts.',
+        ),
+      );
+    }, 30000);
+
+    const onConnected = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+
+    const onError = (err: Error) => {
+      clearTimeout(timeout);
+      reject(err);
+    };
+
+    mongoose.connection.once('connected', onConnected);
+    mongoose.connection.once('error', onError);
+  });
+
+  if (!mongoose.connection.db) {
+    throw new Error('[BetterAuth] MongoDB is not connected.');
+  }
+
+  return mongoose.connection.db;
+}
+
+function createLazyCollection(name: string) {
+  return new Proxy({} as unknown as Record<string, unknown>, {
+    get(_target, prop: string) {
+      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+        const col = mongoose.connection.db.collection(name) as unknown as Record<string, unknown>;
+        const val = col[prop];
+        return typeof val === 'function' ? val.bind(col) : val;
+      }
+
+      return (...args: unknown[]) => {
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+          const col = mongoose.connection.db.collection(name) as unknown as Record<string, (...args: unknown[]) => unknown>;
+          return col[prop].apply(col, args);
+        }
+
+        const promise = (async () => {
+          const db = await getConnectedDb();
+          const col = db.collection(name) as unknown as Record<string, (...args: unknown[]) => unknown>;
+          return col[prop].apply(col, args);
+        })();
+
+        return new Proxy(promise, {
+          get(targetPromise: Promise<unknown>, cursorProp: string) {
+            if (cursorProp === 'then') return targetPromise.then.bind(targetPromise);
+            if (cursorProp === 'catch') return targetPromise.catch.bind(targetPromise);
+            if (cursorProp === 'finally') return targetPromise.finally.bind(targetPromise);
+            return async (...cursorArgs: unknown[]) => {
+              const cursor = await targetPromise;
+              const cursorMethod = (cursor as Record<string, (...args: unknown[]) => unknown>)[cursorProp];
+              if (typeof cursorMethod === 'function') {
+                return cursorMethod.apply(cursor, cursorArgs);
+              }
+              return (cursor as Record<string, unknown>)[cursorProp];
+            };
+          },
+        });
+      };
+    },
+  });
+}
+
 /**
  * Strongly-typed Lazy DB Proxy for mongodbAdapter using Mongoose's MongoDb type.
  *
@@ -33,14 +112,27 @@ const trustedOrigins = [
  */
 const lazyDb: MongoDb = new Proxy({} as unknown as MongoDb, {
   get<K extends keyof MongoDb>(_target: MongoDb, prop: K): MongoDb[K] {
-    const db: MongoDb | undefined = mongoose.connection.db;
-    if (!db) {
-      throw new Error(
-        '[BetterAuth] MongoDB is not connected yet. Ensure connectDatabase() ran in main.ts.',
-      );
+    if (prop === 'collection') {
+      return ((modelName: string) => {
+        if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+          return mongoose.connection.db.collection(modelName);
+        }
+        return createLazyCollection(modelName);
+      }) as MongoDb[K];
     }
-    const value = db[prop];
-    return typeof value === 'function' ? (value.bind(db) as MongoDb[K]) : value;
+
+    if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+      const val = mongoose.connection.db[prop];
+      return typeof val === 'function' ? (val.bind(mongoose.connection.db) as MongoDb[K]) : val;
+    }
+
+    return ((...args: unknown[]) => {
+      return (async () => {
+        const db = await getConnectedDb();
+        const val = db[prop];
+        return typeof val === 'function' ? (val as (...args: unknown[]) => unknown).apply(db, args) : val;
+      })();
+    }) as MongoDb[K];
   },
 });
 

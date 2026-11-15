@@ -14,7 +14,12 @@ import r2Config from './r2.config';
       isGlobal: true,
       cache: true,
       expandVariables: true,
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [
+        '.env.local',
+        '.env',
+        '../../.env.local',
+        '../../.env',
+      ],
       load: [
         appConfig,
         authConfig,
